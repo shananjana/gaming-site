@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <title>Lugx Gaming - Product Detail</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Additional CSS Files -->
+  <link rel="stylesheet" href="assets/css/fontawesome.css">
+  <link rel="stylesheet" href="assets/css/templatemo-lugx-gaming.css">
+  <link rel="stylesheet" href="assets/css/owl.css">
+  <link rel="stylesheet" href="assets/css/animate.css">
+  <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
+</head>
+
+<body>
+
+  <!-- ***** Preloader Start ***** -->
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+      <span class="dot"></span>
+      <div class="dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+  <!-- ***** Preloader End ***** -->
+
+  <!-- ***** Header Area Start ***** -->
+  <header class="header-area header-sticky">
+    <div class="container"><div class="row"><div class="col-12">
+      <nav class="main-nav">
+        <a href="index.html" class="logo"><img src="assets/images/logo.png" alt="" style="width:158px;"></a>
+        <ul class="nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Our Shop</a></li>
+          <li><a href="product-details.html" class="active">Product Details</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="#">Sign In</a></li>
+          <li>
+            <a href="cart.html" id="cart-icon">
+              <i class="fa fa-shopping-cart"></i>
+              <span id="cart-count" class="badge">0</span>
+            </a>
+          </li>
+        </ul>
+        <a class="menu-trigger"><span>Menu</span></a>
+      </nav>
+    </div></div></div>
+  </header>
+  <!-- ***** Header Area End ***** -->
+
+  <!-- Dynamic Product Details -->
+  <div class="page-heading header-text">
+    <div class="container">
+      <div id="product-title" class="row">
+        <!-- JS will inject title and breadcrumb -->
+      </div>
+    </div>
+  </div>
+
+  <div class="single-product section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6">
+          <div id="product-image" class="left-image">
+            <!-- JS will inject image -->
+          </div>
+        </div>
+        <div class="col-lg-6 align-self-center">
+          <div id="product-info">
+            <!-- JS will inject product info -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Info Tabs could remain static or be dynamic if needed -->
+
+  <!-- Related Games can be static or dynamic similarly -->
+
+  <footer>
+    <div class="container"><div class="col-lg-12">
+      <p>Copyright © 2048 LUGX Gaming Company. All rights reserved.
+        &nbsp;&nbsp;<a rel="nofollow" href="https://templatemo.com" target="_blank">Design: TemplateMo</a>
+      </p>
+    </div></div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Analytics snippet
+    function trackEvent(eventData) {
+      fetch('/api/analytics/events', {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(eventData)
+      }).catch(err => console.error('Analytics error:', err));
+    }
+    trackEvent({type:'page_view', url:window.location.pathname, timestamp:new Date().toISOString()});
+    document.addEventListener('click', e => trackEvent({type:'click', target:e.target.tagName, id:e.target.id||null, url:window.location.pathname, timestamp:new Date().toISOString()}));
+
+    const params = new URLSearchParams(window.location.search);
+    const gameId = params.get('id');
+    const gameName = params.get('name');
+
+    function renderGame(game) {
+      // Title & breadcrumb
+      document.getElementById('product-title').innerHTML = `
+        <div class="col-lg-12">
+          <h3>${game.name}</h3>
+          <span class="breadcrumb"><a href="index.html">Home</a> > <a href="shop.html">Shop</a> > ${game.name}</span>
+        </div>`;
+      // Image
+      document.getElementById('product-image').innerHTML = `<img src="${game.image_url}" alt="${game.name}"/>`;
+      // Info section
+      document.getElementById('product-info').innerHTML = `
+        <h4>${game.name}</h4>
+        <span class="price">$${game.price}</span>
+        <p>${game.description || ''}</p>
+        <button id="buy-btn"><i class="fa fa-shopping-bag"></i> Add to Cart</button>
+        <ul>
+          <li><span>Game ID:</span> ${game.id}</li>
+          <li><span>Category:</span> ${game.category}</li>
+          <li><span>Release Date:</span> ${new Date(game.release_date).toLocaleDateString()}</li>
+        </ul>`;
+
+      // Buy button handler
+      document.getElementById('buy-btn').addEventListener('click', () => {
+        let sessionId = localStorage.getItem('sessionId');
+        if (!sessionId) {
+          if (typeof crypto.randomUUID === 'function') {
+            sessionId = crypto.randomUUID();
+          } else {
+            sessionId = 'session_' + Math.random().toString(36).substring(2, 15);
+          }
+          localStorage.setItem('sessionId', sessionId);
+        }
+
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            items: [{ gameId: game.id, quantity: 1 }],
+            total: game.price
+          })
+        })
+        .then(async r => {
+          const text = await r.text();
+          if (r.ok) {
+            alert('✅ Added to cart!');
+            updateCartCount(sessionId);
+          } else {
+            console.error('Order failed:', text);
+            alert('❌ Order failed: ' + text);
+          }
+        })
+        .catch(console.error);
+      });
+      }
+
+    function showError(message) {
+      document.getElementById('product-title').innerHTML = `<div class="col-lg-12"><h3>${message}</h3></div>`;
+    }
+
+    if (gameId) {
+      fetch(`/api/games/${gameId}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Game not found');
+          return res.json();
+        })
+        .then(renderGame)
+        .catch(err => showError(`Error: ${err.message}`));
+    } else if (gameName) {
+      fetch('/api/games')
+        .then(res => res.json())
+        .then(games => {
+          const regex = new RegExp(`^${gameName}$`, 'i'); // Case-insensitive exact match
+          const game = games.find(g => regex.test(g.name));
+          if (game) {
+            renderGame(game);
+          } else {
+            showError(`🚫 Game "<strong>${gameName}</strong>" not found.`);
+          }
+        })
+        .catch(err => showError(`Error: ${err.message}`));
+    } else {
+      showError('⚠️ No game specified');
+    }
+
+    function updateCartCount(sessionId) {
+      fetch(`/api/cart?sessionId=${sessionId}`)
+        .then(res => res.json())
+        .then(items => {
+          const count = items.reduce((sum, item) => sum + item.quantity, 0);
+          const badge = document.getElementById('cart-count');
+          if (badge) badge.textContent = count;
+        })
+        .catch(err => console.error('Cart count update failed:', err));
+    }
+    const sessionId = localStorage.getItem('sessionId');
+    if (sessionId) updateCartCount(sessionId);
+  </script>
+
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/isotope.min.js"></script>
+  <script src="assets/js/owl-carousel.js"></script>
+  <script src="assets/js/counter.js"></script>
+  <script src="assets/js/custom.js"></script>
+</body>
+</html>

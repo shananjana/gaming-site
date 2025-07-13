@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <title>Lugx Gaming - Shop Page</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Additional CSS Files -->
+  <link rel="stylesheet" href="assets/css/fontawesome.css">
+  <link rel="stylesheet" href="assets/css/templatemo-lugx-gaming.css">
+  <link rel="stylesheet" href="assets/css/owl.css">
+  <link rel="stylesheet" href="assets/css/animate.css">
+  <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
+
+  <!-- Custom Overrides -->
+  <style>
+    body { padding-top: 100px; }
+    .section.trending .trending-box { height: auto !important; overflow: visible !important; }
+    .pagination { clear: both; margin: 20px 0; text-align: center; }
+  </style>
+</head>
+
+<body>
+
+  <!-- Preloader -->
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner"><span class="dot"></span><div class="dots"><span></span><span></span><span></span></div></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header-area header-sticky background-header">
+    <div class="container"><div class="row"><div class="col-12">
+      <nav class="main-nav">
+        <a href="index.html" class="logo"><img src="assets/images/logo.png" alt="" style="width:158px;"></a>
+        <ul class="nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html" class="active">Our Shop</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="#">Sign In</a></li>
+          <li>
+            <a href="cart.html" id="cart-icon">
+              <i class="fa fa-shopping-cart"></i>
+              <span id="cart-count" class="badge">0</span>
+            </a>
+          </li>
+        </ul>
+        <a class="menu-trigger"><span>Menu</span></a>
+      </nav>
+    </div></div></div>
+  </header>
+
+  <!-- Page Heading -->
+  <div class="page-heading header-text">
+    <div class="container"><div class="row"><div class="col-lg-12">
+      <h3>Our Shop</h3>
+      <span class="breadcrumb"><a href="index.html">Home</a> &gt; Our Shop</span>
+    </div></div></div>
+  </div>
+
+  <!-- Shop Section -->
+  <div class="section trending">
+    <div class="container">
+      <ul id="category-filters" class="trending-filter"></ul>
+      <div class="row trending-box" id="shop-container"></div>
+      <div class="row"><div class="col-lg-12">
+        <ul id="pagination" class="pagination"></ul>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container"><div class="col-lg-12">
+      <p>Copyright © 2048 LUGX Gaming Company. All rights reserved.
+        &nbsp;&nbsp;<a rel="nofollow" href="https://templatemo.com" target="_blank">Design: TemplateMo</a>
+      </p>
+    </div></div>
+  </footer>
+
+  <!-- Vendor Scripts -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/isotope.min.js"></script>
+  <script src="assets/js/owl-carousel.js"></script>
+  <script src="assets/js/counter.js"></script>
+  <script src="assets/js/custom.js"></script>
+
+  <!-- Dynamic Script -->
+  <script>
+    $(function() {
+      const API = '/api';
+      const perPage = 8;
+      let allGames = [];
+      let filteredGames = [];
+
+      function createGameCard(game) {
+        const cls = game.category.replace(/\s+/g, '-');
+        const price = parseFloat(game.price).toFixed(2);
+        return `
+          <div class="col-lg-3 col-md-6 mb-30 trending-items ${cls}">
+            <div class="item">
+              <div class="thumb">
+                <a href="product-details.html?id=${game.id}">
+                  <img src="${game.image_url}" alt="${game.name}" style="width:100%;height:200px;object-fit:cover;"/>
+                </a>
+                <span class="price">$${price}</span>
+              </div>
+              <div class="down-content">
+                <span class="category">${game.category}</span>
+                <h4>${game.name}</h4>
+                <a href="product-details.html?id=${game.id}"><i class="fa fa-shopping-bag"></i></a>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      function getQueryParam(key) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(key);
+      }
+
+      function renderPage(page) {
+        const container = $('#shop-container').empty();
+        const start = (page - 1) * perPage;
+        filteredGames.slice(start, start + perPage)
+          .forEach(game => container.append(createGameCard(game)));
+        renderPagination(page);
+      }
+
+      function renderPagination(activePage) {
+        const totalPages = Math.ceil(filteredGames.length / perPage) || 1;
+        const ul = $('#pagination').empty();
+        for (let i = 1; i <= totalPages; i++) {
+          const cls = i === activePage ? 'is_active' : '';
+          ul.append(`<li><a href="#" class="${cls}" data-page="${i}">${i}</a></li>`);
+        }
+        ul.find('a').off('click').on('click', function(e) {
+          e.preventDefault();
+          const page = +$(this).data('page');
+          renderPage(page);
+        });
+      }
+
+      function applyFilter(filter) {
+        if (filter === '*') filteredGames = allGames.slice();
+        else {
+          const cls = filter.slice(1);
+          filteredGames = allGames.filter(g => g.category.replace(/\s+/g, '-') === cls);
+        }
+        renderPage(1);
+      }
+
+      function loadCategories() {
+        return fetch(`${API}/games/categories`)
+          .then(r => r.json())
+          .then(cats => {
+            const ul = $('#category-filters').empty();
+            ul.append('<li><a class="is_active" href="#" data-filter="*">Show All</a></li>');
+            cats.forEach(cat => {
+              const safe = cat.replace(/\s+/g, '-');
+              ul.append(`<li><a href="#" data-filter=".${safe}">${cat}</a></li>`);
+            });
+            ul.find('a').off('click').on('click', function(e) {
+              e.preventDefault();
+              ul.find('a').removeClass('is_active');
+              $(this).addClass('is_active');
+              applyFilter($(this).data('filter'));
+            });
+          });
+      }
+
+      function loadGames() {
+        fetch(`${API}/games`)
+          .then(r => r.json())
+          .then(games => {
+            allGames = games;
+            filteredGames = allGames.slice();
+            loadCategories().then(() => {
+              const categoryParam = getQueryParam('category');
+              if (categoryParam) {
+                const filterClass = '.' + categoryParam.replace(/\s+/g, '-');
+                $(`#category-filters a[data-filter="${filterClass}"]`).click();
+              } else {
+                renderPage(1); // default to show all
+              }
+            });
+          })
+          .catch(console.error);
+      }
+
+      loadGames();
+    });
+
+    function updateCartCount(sessionId) {
+      fetch(`/api/cart?sessionId=${sessionId}`)
+        .then(res => res.json())
+        .then(items => {
+          const count = items.reduce((sum, item) => sum + item.quantity, 0);
+          const badge = document.getElementById('cart-count');
+          if (badge) badge.textContent = count;
+        })
+        .catch(err => console.error('Cart count update failed:', err));
+    }
+    const sessionId = localStorage.getItem('sessionId');
+    if (sessionId) updateCartCount(sessionId);
+  </script>
+</body>
+</html>
