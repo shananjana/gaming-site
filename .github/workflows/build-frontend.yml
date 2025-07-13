@@ -8,7 +8,7 @@ on:
       - '.github/workflows/build-frontend.yml'
 
 concurrency:
-  group: cd-push-lock-${{ github.run_id }}
+  group: build-frontend
   cancel-in-progress: false
 
 jobs:
@@ -56,4 +56,8 @@ jobs:
 
         git add overlays/dev/frontend/kustomization.yaml
         git commit -m "Update analytic-service image tag to ${{ github.sha }}"
-        git push origin main
+        git push origin main || {
+          echo "Push failed. Retrying after rebase..."
+          git pull --rebase origin main
+          git push origin main
+        }
