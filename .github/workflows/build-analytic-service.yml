@@ -7,6 +7,10 @@ on:
       - 'analytics-service/**'
       - '.github/workflows/build-analytic-service.yml'
 
+concurrency:
+  group: cd-push-lock
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest

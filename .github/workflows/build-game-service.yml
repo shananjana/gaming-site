@@ -6,6 +6,10 @@ on:
     paths:
       - 'game-service/**'
 
+concurrency:
+  group: cd-push-lock
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -50,3 +54,16 @@ jobs:
     - name: Push Docker image
       run: |
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/game-service:$GIT_SHA
+
+    - name: Clone and push changes to CD
+      run: |
+        git config --global user.email "ci-bot@lugx-gaming.com"
+        git config --global user.name "LUGX Gaming CI Bot"
+        git clone https://x-access-token:${{ secrets.CD_PUSH_TOKEN }}@github.com/shananjana/gaming-site-cd.git
+        cd gaming-site-cd
+
+        sed -i "s/newTag: .*/newTag: $GIT_SHA/" overlays/dev/game-service/kustomization.yaml
+
+        git add overlays/dev/game-service/kustomization.yaml
+        git commit -m "Update analytic-service image tag to ${{ github.sha }}"
+        git push origin main
