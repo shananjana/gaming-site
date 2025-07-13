@@ -8,7 +8,7 @@ on:
       - '.github/workflows/build-game-service.yml'
 
 concurrency:
-  group: cd-push-lock
+  group: cd-push-lock-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
