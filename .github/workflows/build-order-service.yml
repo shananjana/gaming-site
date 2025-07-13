@@ -66,7 +66,7 @@ jobs:
         sed -i "s/newTag: .*/newTag: $GIT_SHA/" overlays/dev/order-service/kustomization.yaml
 
         git add overlays/dev/order-service/kustomization.yaml
-        git commit -m "Update analytic-service image tag to ${{ github.sha }}"
+        git commit -m "Update order-service image tag to ${{ github.sha }}"
         git push origin main || {
           echo "Push failed. Retrying after rebase..."
           git pull --rebase origin main
