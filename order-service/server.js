@@ -17,7 +17,7 @@ app.listen(port, () => {
 });
 
 app.post('/api/orders', async (req, res) => {
-  const { sessionId, items, total } = req.body;
+  const { sessionId, items } = req.body;
 
   if (!sessionId || !Array.isArray(items) || items.length === 0) {
     return res.status(400).send({ error: 'Invalid order payload' });
@@ -31,7 +31,7 @@ app.post('/api/orders', async (req, res) => {
 
     // Find or create order
     let result = await client.query(
-      `SELECT id FROM orders WHERE session_id = $1 ORDER BY created_at DESC LIMIT 1`, [sessionId]
+      'SELECT id FROM orders WHERE session_id = $1 ORDER BY created_at DESC LIMIT 1', [sessionId]
     );
 
     let orderId;
@@ -39,13 +39,13 @@ app.post('/api/orders', async (req, res) => {
       orderId = result.rows[0].id;
     } else {
       const insertOrder = await client.query(
-        `INSERT INTO orders (session_id) VALUES ($1) RETURNING id`, [sessionId]
+        'INSERT INTO orders (session_id) VALUES ($1) RETURNING id', [sessionId]
       );
       orderId = insertOrder.rows[0].id;
     }
 
     // Validate and get price
-    const game = await client.query(`SELECT price FROM games WHERE id = $1`, [gameId]);
+    const game = await client.query('SELECT price FROM games WHERE id = $1', [gameId]);
     if (game.rows.length === 0) throw new Error('Game not found');
     const price = parseFloat(game.rows[0].price);
 

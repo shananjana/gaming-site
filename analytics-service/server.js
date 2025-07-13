@@ -9,7 +9,7 @@ const clickhouse = new ClickHouse({
   user: process.env.CLICKHOUSE_USER,  // Now using secret
   password: process.env.CLICKHOUSE_PASSWORD,  // Now using secret
   debug: true,
-  format: "json"
+  format: 'json'
 });
 
 
