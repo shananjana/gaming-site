@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'analytics-service/**'
+      - '.github/workflows/build-analytic-service.yml'
 
 jobs:
   build:
