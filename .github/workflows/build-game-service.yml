@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'game-service/**'
+      - '.github/workflows/build-game-service.yml'
 
 concurrency:
   group: cd-push-lock

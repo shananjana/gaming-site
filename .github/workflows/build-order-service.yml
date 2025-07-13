@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'order-service/**'
+      - '.github/workflows/build-order-service.yml'
 
 concurrency:
   group: cd-push-lock
