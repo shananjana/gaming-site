@@ -1,0 +1,52 @@
+name: Build & Push Game Service
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'game-service/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: game-service
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Hadolint (Dockerfile linter)
+      run: |
+        sudo wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+        sudo chmod +x /bin/hadolint
+
+    - name: Lint Dockerfile
+      run: hadolint Dockerfile
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npx eslint .
+
+    - name: Extract Git Commit Hash
+      id: vars
+      run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+    - name: Log in to DockerHub
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/game-service:$GIT_SHA .
+
+    - name: Push Docker image
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/game-service:$GIT_SHA
