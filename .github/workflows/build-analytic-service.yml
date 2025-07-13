@@ -62,9 +62,11 @@ jobs:
     - name: Update image tag in CD repo
       run: |
         sed -i "s/newTag: .*/newTag: $GIT_SHA/" overlays/dev/analytics-service/kustomization.yaml
+      working-directory: gaming-site-cd
 
     - name: Commit and push change
       run: |
         git add overlays/dev/analytics-service/kustomization.yaml
         git commit -m "Update analytic-service image tag to ${{ github.sha }}"
         git push origin main
+      working-directory: gaming-site-cd
