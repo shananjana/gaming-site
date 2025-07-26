@@ -19,8 +19,7 @@ function streamToString(stream) {
 
 const BUCKET_NAME = process.env.S3_BUCKET;
 const REGION = process.env.AWS_REGION || 'us-east-1';
-const FLUSH_INTERVAL_MS = 10000; // 10 seconds
-const MAX_RETRIES = 3;
+const FLUSH_INTERVAL_MS = 10000;
 
 const s3 = new S3Client({
   region: REGION,
