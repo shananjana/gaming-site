@@ -90,33 +90,6 @@
       })
       .catch(console.error);
 
-    // Utility function for analytics
-    function trackEvent(eventData) {
-      fetch('/api/analytics/events', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(eventData)
-      }).catch(err => console.error('Analytics error:', err));
-    }
-
-    // Page view tracking
-    trackEvent({
-      type: 'page_view',
-      url: window.location.pathname,
-      timestamp: new Date().toISOString()
-    });
-
-    // Click tracking
-    document.addEventListener('click', e => {
-      trackEvent({
-        type: 'click',
-        target: e.target.tagName,
-        id: e.target.id || null,
-        url: window.location.pathname,
-        timestamp: new Date().toISOString()
-      });
-    });
-
     function handleSearch(e) {
       e.preventDefault();
       const searchText = document.getElementById('searchText').value.trim();
@@ -409,6 +382,7 @@ Level up your gaming experience – only at LUGX.</p>
   <script src="assets/js/owl-carousel.js"></script>
   <script src="assets/js/counter.js"></script>
   <script src="assets/js/custom.js"></script>
+  <script src="assets/js/analytics.js"></script>
 
   </body>
 </html>

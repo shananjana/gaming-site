@@ -93,15 +93,6 @@
 
   <!-- Scripts -->
   <script>
-    // Analytics snippet
-    function trackEvent(eventData) {
-      fetch('/api/analytics/events', {
-        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(eventData)
-      }).catch(err => console.error('Analytics error:', err));
-    }
-    trackEvent({type:'page_view', url:window.location.pathname, timestamp:new Date().toISOString()});
-    document.addEventListener('click', e => trackEvent({type:'click', target:e.target.tagName, id:e.target.id||null, url:window.location.pathname, timestamp:new Date().toISOString()}));
-
     const params = new URLSearchParams(window.location.search);
     const gameId = params.get('id');
     const gameName = params.get('name');
@@ -211,5 +202,6 @@
   <script src="assets/js/owl-carousel.js"></script>
   <script src="assets/js/counter.js"></script>
   <script src="assets/js/custom.js"></script>
+  <script src="assets/js/analytics.js"></script>
 </body>
 </html>

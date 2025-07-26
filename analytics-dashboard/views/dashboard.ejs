@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Analytics Dashboard</title>
+  <link rel="stylesheet" href="/lugx-game/analytics/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Analytics Dashboard</h1>
+
+  <form method="GET" action="/lugx-game/analytics">
+    <label for="range">Time Range:</label>
+    <select name="range" id="range" onchange="this.form.submit()">
+      <option value="1h" <%= selectedRange === '1h' ? 'selected' : '' %>>Last 1 Hour</option>
+      <option value="12h" <%= selectedRange === '12h' ? 'selected' : '' %>>Last 12 Hours</option>
+      <option value="24h" <%= selectedRange === '24h' ? 'selected' : '' %>>Last 24 Hours</option>
+      <option value="7d" <%= selectedRange === '7d' ? 'selected' : '' %>>Last 7 Days</option>
+      <option value="30d" <%= selectedRange === '30d' ? 'selected' : '' %>>Last 30 Days</option>
+    </select>
+  </form>
+
+  <form id="refreshForm">
+    <label for="refreshRate">Auto-Refresh:</label>
+    <select id="refreshRate" name="refreshRate">
+      <option value="0">Disabled</option>
+      <option value="5000">Every 5 seconds</option>
+      <option value="10000">Every 10 seconds</option>
+    </select>
+  </form>
+
+  <div class="chart-container"><canvas id="eventTypeChart"></canvas></div>
+  <div class="chart-container"><canvas id="hourlyChart"></canvas></div>
+  <div class="chart-container"><canvas id="pageViewChart"></canvas></div>
+  <div class="chart-container"><canvas id="durationChart"></canvas></div>
+  <div class="chart-container"><canvas id="elementChart"></canvas></div>
+  <div class="chart-container"><canvas id="scrollChart"></canvas></div>
+
+  <script>
+    // Parse data from server
+    const data = <%- JSON.stringify(chartData) %>;
+    console.log('Full chartData:', data);
+
+    const extract = (arr, field) => Array.isArray(arr) ? arr.map(r => r[field]) : [];
+
+    new Chart(document.getElementById('eventTypeChart'), {
+      type: 'bar',
+      data: {
+        labels: extract(data.eventTypeCounts, 'event_type'),
+        datasets: [{
+          label: 'Event Count',
+          data: extract(data.eventTypeCounts, 'count'),
+          backgroundColor: 'rgba(54, 162, 235, 0.6)'
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('hourlyChart'), {
+      type: 'line',
+      data: {
+        labels: extract(data.eventsOverTime, 'hour'),
+        datasets: [{
+          label: 'Events per Hour',
+          data: extract(data.eventsOverTime, 'count'),
+          borderColor: 'rgba(255, 99, 132, 0.6)',
+          fill: false
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('pageViewChart'), {
+      type: 'bar',
+      data: {
+        labels: extract(data.pageViews, 'page_url'),
+        datasets: [{
+          label: 'Page Views',
+          data: extract(data.pageViews, 'views'),
+          backgroundColor: 'rgba(75, 192, 192, 0.6)'
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('durationChart'), {
+      type: 'bar',
+      data: {
+        labels: extract(data.avgDurations, 'page_url'),
+        datasets: [{
+          label: 'Avg Duration (ms)',
+          data: extract(data.avgDurations, 'avg_duration'),
+          backgroundColor: 'rgba(153, 102, 255, 0.6)'
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('elementChart'), {
+      type: 'bar',
+      data: {
+        labels: extract(data.elementClicks, 'element_tag'),
+        datasets: [{
+          label: 'Element Clicks',
+          data: extract(data.elementClicks, 'count'),
+          backgroundColor: 'rgba(255, 206, 86, 0.6)'
+        }]
+      }
+    });
+
+    new Chart(document.getElementById('scrollChart'), {
+      type: 'line',
+      data: {
+        labels: extract(data.scrollDepth, 'scroll_depth'),
+        datasets: [{
+          label: 'Scroll Depth Count',
+          data: extract(data.scrollDepth, 'count'),
+          borderColor: 'rgba(255, 159, 64, 0.6)',
+          fill: false
+        }]
+      }
+    });
+    
+    let refreshInterval = null;
+
+    const refreshRateSelector = document.getElementById('refreshRate');
+    refreshRateSelector.addEventListener('change', function () {
+    // Clear any existing interval
+    if (refreshInterval) clearInterval(refreshInterval);
+
+    const selectedValue = parseInt(this.value);
+
+    if (selectedValue > 0) {
+      refreshInterval = setInterval(() => {
+        window.location.reload();
+      }, selectedValue);
+    }
+  });
+
+  // Optional: Persist last selected rate using localStorage
+  const lastRate = localStorage.getItem('refreshRate');
+  if (lastRate) {
+    refreshRateSelector.value = lastRate;
+    refreshRateSelector.dispatchEvent(new Event('change'));
+  }
+
+  refreshRateSelector.addEventListener('change', () => {
+    localStorage.setItem('refreshRate', refreshRateSelector.value);
+  });
+    
+  </script>
+</body>
+</html>
+
