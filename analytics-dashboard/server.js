@@ -18,12 +18,12 @@ const clickhouse = new ClickHouse({
 
 function buildTimeFilter(range) {
   switch (range) {
-    case '1h': return `timestamp >= now() - INTERVAL 1 HOUR`;
-    case '12h': return `timestamp >= now() - INTERVAL 12 HOUR`;
-    case '24h': return `timestamp >= now() - INTERVAL 1 DAY`;
-    case '7d': return `timestamp >= now() - INTERVAL 7 DAY`;
-    case '30d': return `timestamp >= now() - INTERVAL 30 DAY`;
-    default: return `timestamp >= now() - INTERVAL 7 DAY`;
+    case '1h': return 'timestamp >= now() - INTERVAL 1 HOUR';
+    case '12h': return 'timestamp >= now() - INTERVAL 12 HOUR';
+    case '24h': return 'timestamp >= now() - INTERVAL 1 DAY';
+    case '7d': return 'timestamp >= now() - INTERVAL 7 DAY';
+    case '30d': return 'timestamp >= now() - INTERVAL 30 DAY';
+    default: return 'timestamp >= now() - INTERVAL 7 DAY';
   }
 }
 
