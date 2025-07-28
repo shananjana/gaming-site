@@ -41,6 +41,9 @@ jobs:
     - name: Run ESLint
       run: npx eslint .
 
+    - name: Run Jest tests
+      run: npm test
+
     - name: Extract Git Commit Hash
       id: vars
       run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
