@@ -42,17 +42,13 @@ app.get('/api/games/most-played', async (req, res) => {
   res.json(rows);
 });
 
-// 4) Categories list (optional)
+// 4) Categories list
 app.get('/api/games/categories', async (req, res) => {
   const { rows } = await pool.query(
     `SELECT DISTINCT category 
        FROM games`
   );
   res.json(rows.map(r => r.category));
-});
-
-app.listen(port, () => {
-  console.log(`Game service running on port ${port}`);
 });
 
 // Fetch single game by its numeric ID
@@ -87,5 +83,11 @@ app.get('/api/games/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Game service running on port ${port}`);
+  });
+}
 
 module.exports = app;
