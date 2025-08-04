@@ -8,7 +8,7 @@ jest.mock('pg', () => {
 });
 
 const { Pool } = require('pg');
-const app = require('../server'); // adjust path if needed
+const app = require('../server');
 
 describe('Game Service API Tests', () => {
   beforeEach(() => {
